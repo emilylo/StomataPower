@@ -9,14 +9,25 @@ import matplotlib.mlab as mlab;
 import matplotlib.pyplot as pyplot;
 #import matplotlib.patches as patches;
 import random;
+import math;
 
 # Takes a workbook sheet and a point count and returns an Nx2 numpy array of point values
 def recordSheetCoordinates(point_sheet, point_count):
-    points = np.zeros((point_count, 2), dtype=np.int);
+    points = np.zeros((point_count, 3), dtype = np.float);
     for i in range(0, point_count):
-        points[i, 0] = int(round(point_sheet.cell(row = i + 3, column = 1).value));
-        points[i, 1]= int(round(point_sheet.cell(row = i + 3, column = 2).value));
-    return points;
+        points[i, 0] = point_sheet.cell(row = i + 3, column = 1).value;
+        points[i, 1] = point_sheet.cell(row = i + 3, column = 2).value;
+    
+    # Calculate angle of each point from center (x_mean, y_mean) and sort points by angle 
+    x_mean = np.mean(points[:, 0]);
+    y_mean = np.mean(points[:, 1]);
+    for j in range(0, point_count):
+        points[j, 2] = math.atan2(points[j, 1] - y_mean, points[j, 0] - x_mean);
+    points = points[points[:,2].argsort()];
+    
+    # New array with only the x-value and y-value columns
+    points2 = np.delete(points,np.s_[-1:],1);
+    return points2;
 
 # Check if the given list of points are inside the polygon specified by the list of
 # polygon_points. Returns the indices of the points_list whose points are inside the
@@ -24,25 +35,16 @@ def recordSheetCoordinates(point_sheet, point_count):
 def checkPointsInPolygon(polygon_list, points_list):
     inside = mlab.inside_poly(points_list, polygon_list);
     return inside;
-    '''
-    if (mlab.is_closed_polygon(polygon_list)):
-        inside = mlab.inside_poly(points_list, polygon_list);
-        print(inside); #return inside;
-    else:
-        #make closed polygon
-    '''
 
 # Takes the number of random points to be generated, the maximum x-coordinate value
 # of the cotyledon outline, and the maximum y-coordinate value of the cotyledon
 # outline and returns an Nx2 numpy array of random points.
 def generateRandomPoints(number_of_points, x_max, y_max):
-    random_points = np.zeros((number_of_points, 2), dtype=np.int);
+    random_points = np.zeros((number_of_points, 2), dtype=np.float);
     for k in range(0, number_of_points):
-        random_points[k,0] = random.randint(0, x_max);
-        random_points[k,1] = random.randint(0, y_max); 
+        random_points[k,0] = random.uniform(0, x_max);
+        random_points[k,1] = random.uniform(0, y_max); 
     return random_points;
-    
-
 
 # Reads in the Excel File (must be of version .xlsx) and gets the worksheet names
 crelox_data_file_name = sys.argv[1];
@@ -60,7 +62,6 @@ stomata_points = recordSheetCoordinates(stomata_sheet, stomata_count);
 cotyledon_points = recordSheetCoordinates(cotyledon_sheet, cotyledon_point_count);
 cot_x_max = cotyledon_points[:,0].max()
 cot_y_max = cotyledon_points[:,1].max();
-#cotyledon_points[np.argsort(cotyledon_points[:, 1])];
 
 # Gets the number of sector outline worksheets. Relies on the fact that the sector
 # worksheets come sequentially immediately following the cotyledon outline worksheet
@@ -74,20 +75,16 @@ for i in range(0, number_of_sectors):
     sector_sheet = crelox_wb.get_sheet_by_name(sector_names[i]);
     sector_point_count = sector_sheet.max_row - 2;
     sector_points = recordSheetCoordinates(sector_sheet, sector_point_count);
-    #sector_points[np.argsort(sector_points[:, 1])];
     pyplot.plot(sector_points[:,0], sector_points[:,1], 'g');
 
 #Plots the cotyledon outline and stomatal points
 pyplot.plot(stomata_points[:,0], stomata_points[:,1], 'b.');
 pyplot.plot(cotyledon_points[:,0], cotyledon_points[:,1], 'm');
-#pyplot.gca().add_patch(patches.Polygon(cotyledon_points,closed=True,fill=False)) #This turns a non-polygon into a polygon???
 pyplot.axis('equal');
-    
-#print(checkPointsInPolygon(cotyledon_points, stomata_points));
-    
+
 # Generate 1000 random points with cot_x_max and cot_y_max and check which random
 # points are inside the cotyledon
-all_rand_points = generateRandomPoints(1000, cot_x_max, cot_y_max);
+all_rand_points = generateRandomPoints(1500, cot_x_max, cot_y_max);
 rand_points_indices_inside = checkPointsInPolygon(cotyledon_points, all_rand_points);
 
 # Create np array with only the random points inside the cotyledon
@@ -98,9 +95,10 @@ for i in range(0, number_inside):
     rand_points_inside[i] = all_rand_points[rand_points_indices_inside[i]];
 #print(rand_points_inside);
 
-
+#pyplot.plot(all_rand_points[:,0], all_rand_points[:,1], 'r.');
 pyplot.plot(rand_points_inside[:,0], rand_points_inside[:,1], 'r.');
 pyplot.show();
 
 #vertcies Nx2 float array of vertices
 #numpy.genfromtxt: (names=True) or skip_header
+#pyplot.gca().add_patch(patches.Polygon(cotyledon_points,closed=True,fill=False)) #This turns a non-polygon into a polygon???
