@@ -7,6 +7,7 @@ import numpy as np;
 import openpyxl;
 import matplotlib.mlab as mlab;
 import matplotlib.pyplot as pyplot;
+#import matplotlib.patches as patches;
 import random;
 
 # Takes a workbook sheet and a point count and returns an Nx2 numpy array of point values
@@ -32,7 +33,7 @@ cotyledon_point_count = cotyledon_sheet.max_row - 2;
 
 stomata_points = recordSheetCoordinates(stomata_sheet, stomata_count);
 cotyledon_points = recordSheetCoordinates(cotyledon_sheet, cotyledon_point_count);
-
+#cotyledon_points[np.argsort(cotyledon_points[:, 1])];
 
 # Gets the number of sector outline worksheets. Relies on the fact that the sector
 # worksheets come sequentially immediately following the cotyledon outline worksheet
@@ -46,11 +47,13 @@ for i in range(0, number_of_sectors):
     sector_sheet = crelox_wb.get_sheet_by_name(sector_names[i]);
     sector_point_count = sector_sheet.max_row - 2;
     sector_points = recordSheetCoordinates(sector_sheet, sector_point_count);
-    pyplot.plot(sector_points[:,0], sector_points[:,1], 'g.');
+    #sector_points[np.argsort(sector_points[:, 1])];
+    pyplot.plot(sector_points[:,0], sector_points[:,1], 'g');
 
 #Plots the cotyledon outline and stomatal points
 pyplot.plot(stomata_points[:,0], stomata_points[:,1], 'b.');
-pyplot.plot(cotyledon_points[:,0], cotyledon_points[:,1], 'mo');
+pyplot.plot(cotyledon_points[:,0], cotyledon_points[:,1], 'm');
+#pyplot.gca().add_patch(patches.Polygon(cotyledon_points,closed=True,fill=False)) #This turns a non-polygon into a polygon???
 pyplot.axis('equal');
 pyplot.show();
 
@@ -80,7 +83,7 @@ def generateRandomPoints(number_of_points, x_max, y_max):
         random_points = np.array(random_points);
     return random_points;
     
-print(checkPointsInPolygon(cotyledon_points, stomata_points));
+#print(checkPointsInPolygon(cotyledon_points, stomata_points));
 
 
 #vertcies Nx2 float array of vertices
