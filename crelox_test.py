@@ -100,9 +100,10 @@ pyplot.plot(stomata_points[:,0], stomata_points[:,1], 'b.');
 pyplot.plot(cotyledon_points[:,0], cotyledon_points[:,1], 'm');
 pyplot.axis('equal');
 
+
 # Generates 1000 random points with cot_x_max and cot_y_max and check which random
 # points are inside the cotyledon
-all_rand_points = generateRandomPoints(500, cot_x_max, cot_y_max);
+all_rand_points = generateRandomPoints(700, cot_x_max, cot_y_max);
 rand_points_indices_inside = checkPointsInPolygon(cotyledon_points, all_rand_points);
 
 # Create np array with only the random points inside the cotyledon
@@ -114,12 +115,17 @@ for i in range(0, number_inside):
 
 #pyplot.plot(all_rand_points[:,0], all_rand_points[:,1], 'r.');
 pyplot.plot(rand_points_inside[:,0], rand_points_inside[:,1], 'r.');
+
+pyplot.xlabel('X Position (microns)');
+pyplot.ylabel('Y Position (microns)');
 pyplot.show();
+
 
 # Compute autocorrelation of stomatal points and random points
 stomata_autocorr = computeAutocorrelation(stomata_points);
 random_autocorr = computeAutocorrelation(rand_points_inside);
 stom_rand_crosscorr = computeCrosscorrelation(stomata_points, rand_points_inside);
+
 
 # Plot distributions on histogram
 distance_bins = [w * 100 for w in range(25)];
@@ -127,6 +133,8 @@ stomata_hist = pyplot.hist(stomata_autocorr, bins = distance_bins, alpha = 0.5, 
 random_hist = pyplot.hist(random_autocorr, bins = distance_bins, alpha = 0.5, label = 'Random', color = 'r');
 crosscorr_hist = pyplot.hist(stom_rand_crosscorr, bins = distance_bins, alpha = 0.5, label = 'Crosscorrelation', color = 'w');
 pyplot.legend(loc='upper right');
+pyplot.xlabel('Distance (microns)');
+pyplot.ylabel('Frequency');
 pyplot.show();
 
 
