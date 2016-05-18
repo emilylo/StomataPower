@@ -10,6 +10,8 @@ import matplotlib.pyplot as pyplot;
 #import matplotlib.patches as patches;
 import random;
 import math;
+import scipy.spatial as sps;
+import statistics as stat;
 
 # Takes a workbook sheet and a point count and returns an Nx2 numpy array of point values
 def recordSheetCoordinates(point_sheet, point_count):
@@ -40,11 +42,29 @@ def checkPointsInPolygon(polygon_list, points_list):
 # of the cotyledon outline, and the maximum y-coordinate value of the cotyledon
 # outline and returns an Nx2 numpy array of random points.
 def generateRandomPoints(number_of_points, x_max, y_max):
-    random_points = np.zeros((number_of_points, 2), dtype=np.float);
-    for k in range(0, number_of_points):
-        random_points[k,0] = random.uniform(0, x_max);
-        random_points[k,1] = random.uniform(0, y_max); 
+    random_points = np.zeros((number_of_points, 2), dtype = np.float);
+    for i in range(0, number_of_points):
+        random_points[i, 0] = random.uniform(0, x_max);
+        random_points[i, 1] = random.uniform(0, y_max); 
     return random_points;
+
+# Takes an Nx2 numpy array of points and returns an array of all the 
+# distances representing the autocorrelation of the points
+def computeAutocorrelation(points_list):
+    return computeCrosscorrelation(points_list, points_list);
+
+# Takes two Nx2 numpy arrays of points and returns an array of all the 
+# distances representing the cross correlation of the two point sets
+def computeCrosscorrelation(points_list_1, points_list_2):
+    point_count_1 = len(points_list_1);
+    point_count_2 = len(points_list_2);
+    crosscorr_count = point_count_1 * point_count_2;
+    crosscorr_list = np.zeros(crosscorr_count, dtype = np.float);
+    # Compute each distance and add to list
+    for i in range(0, point_count_1):
+        for j in range(0, point_count_2):
+            crosscorr_list[i*point_count_2 + j] = sps.distance.euclidean(points_list_1[i,:], points_list_2[j,:]);
+    return crosscorr_list;
 
 # Reads in the Excel File (must be of version .xlsx) and gets the worksheet names
 crelox_data_file_name = sys.argv[1];
@@ -77,19 +97,18 @@ for i in range(0, number_of_sectors):
     sector_points = recordSheetCoordinates(sector_sheet, sector_point_count);
     pyplot.plot(sector_points[:,0], sector_points[:,1], 'g');
 
-#Plots the cotyledon outline and stomatal points
+# Plots the cotyledon outline and stomatal points
 pyplot.plot(stomata_points[:,0], stomata_points[:,1], 'b.');
 pyplot.plot(cotyledon_points[:,0], cotyledon_points[:,1], 'm');
 pyplot.axis('equal');
 
-# Generate 1000 random points with cot_x_max and cot_y_max and check which random
+# Generates 1000 random points with cot_x_max and cot_y_max and check which random
 # points are inside the cotyledon
-all_rand_points = generateRandomPoints(1500, cot_x_max, cot_y_max);
+all_rand_points = generateRandomPoints(500, cot_x_max, cot_y_max);
 rand_points_indices_inside = checkPointsInPolygon(cotyledon_points, all_rand_points);
 
 # Create np array with only the random points inside the cotyledon
 number_inside = len(rand_points_indices_inside);
-#print(number_inside);
 rand_points_inside = np.zeros((number_inside, 2), dtype=np.int);
 for i in range(0, number_inside):
     rand_points_inside[i] = all_rand_points[rand_points_indices_inside[i]];
@@ -98,6 +117,16 @@ for i in range(0, number_inside):
 #pyplot.plot(all_rand_points[:,0], all_rand_points[:,1], 'r.');
 pyplot.plot(rand_points_inside[:,0], rand_points_inside[:,1], 'r.');
 pyplot.show();
+
+
+stomata_autocorr = computeAutocorrelation(stomata_points);
+random_autocorr = computeAutocorrelation(rand_points_inside);
+distance_bins = [w * 100 for w in range(25)];
+stomata_hist = pyplot.hist(stomata_autocorr, bins = distance_bins, alpha = 0.5, label = 'Stomata', color = 'b');
+random_hist = pyplot.hist(random_autocorr, bins = distance_bins, alpha = 0.5, label = 'Random', color = 'r');
+pyplot.legend(loc='upper right');
+pyplot.show();
+
 
 #vertcies Nx2 float array of vertices
 #numpy.genfromtxt: (names=True) or skip_header
