@@ -7,11 +7,9 @@ import numpy as np;
 import openpyxl;
 import matplotlib.mlab as mlab;
 import matplotlib.pyplot as pyplot;
-#import matplotlib.patches as patches;
 import random;
 import math;
 import scipy.spatial as sps;
-import statistics as stat;
 
 # Takes a workbook sheet and a point count and returns an Nx2 numpy array of point values
 def recordSheetCoordinates(point_sheet, point_count):
@@ -118,12 +116,16 @@ for i in range(0, number_inside):
 pyplot.plot(rand_points_inside[:,0], rand_points_inside[:,1], 'r.');
 pyplot.show();
 
-
+# Compute autocorrelation of stomatal points and random points
 stomata_autocorr = computeAutocorrelation(stomata_points);
 random_autocorr = computeAutocorrelation(rand_points_inside);
+stom_rand_crosscorr = computeCrosscorrelation(stomata_points, rand_points_inside);
+
+# Plot distributions on histogram
 distance_bins = [w * 100 for w in range(25)];
 stomata_hist = pyplot.hist(stomata_autocorr, bins = distance_bins, alpha = 0.5, label = 'Stomata', color = 'b');
 random_hist = pyplot.hist(random_autocorr, bins = distance_bins, alpha = 0.5, label = 'Random', color = 'r');
+crosscorr_hist = pyplot.hist(stom_rand_crosscorr, bins = distance_bins, alpha = 0.5, label = 'Crosscorrelation', color = 'w');
 pyplot.legend(loc='upper right');
 pyplot.show();
 
