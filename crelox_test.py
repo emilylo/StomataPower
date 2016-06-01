@@ -11,6 +11,10 @@ import random;
 import math;
 import scipy.spatial as sps;
 
+'''
+Begin section for defining necessary functions.
+'''
+
 # Takes a workbook sheet and a point count and returns an Nx2 numpy array of point values
 def recordSheetCoordinates(point_sheet, point_count):
     points = np.zeros((point_count, 3), dtype = np.float);
@@ -64,6 +68,15 @@ def computeCrosscorrelation(points_list_1, points_list_2):
             crosscorr_list[i*point_count_2 + j] = sps.distance.euclidean(points_list_1[i,:], points_list_2[j,:]);
     return crosscorr_list;
 
+'''
+End of function definition section.
+'''    
+    
+
+'''
+Begin of procedural section.
+'''
+
 # Reads in the Excel File (must be of version .xlsx) and gets the worksheet names
 crelox_data_file_name = sys.argv[1];
 crelox_wb = openpyxl.load_workbook(crelox_data_file_name);
@@ -78,7 +91,7 @@ cotyledon_point_count = cotyledon_sheet.max_row - 2;
 
 stomata_points = recordSheetCoordinates(stomata_sheet, stomata_count);
 cotyledon_points = recordSheetCoordinates(cotyledon_sheet, cotyledon_point_count);
-cot_x_max = cotyledon_points[:,0].max()
+cot_x_max = cotyledon_points[:,0].max();
 cot_y_max = cotyledon_points[:,1].max();
 
 # Gets the number of sector outline worksheets. Relies on the fact that the sector
@@ -103,7 +116,7 @@ pyplot.axis('equal');
 
 # Generates 1000 random points with cot_x_max and cot_y_max and check which random
 # points are inside the cotyledon
-all_rand_points = generateRandomPoints(700, cot_x_max, cot_y_max);
+all_rand_points = generateRandomPoints(1000, cot_x_max, cot_y_max);
 rand_points_indices_inside = checkPointsInPolygon(cotyledon_points, all_rand_points);
 
 # Create np array with only the random points inside the cotyledon
@@ -111,7 +124,7 @@ number_inside = len(rand_points_indices_inside);
 rand_points_inside = np.zeros((number_inside, 2), dtype=np.int);
 for i in range(0, number_inside):
     rand_points_inside[i] = all_rand_points[rand_points_indices_inside[i]];
-#print(rand_points_inside);
+
 
 #pyplot.plot(all_rand_points[:,0], all_rand_points[:,1], 'r.');
 pyplot.plot(rand_points_inside[:,0], rand_points_inside[:,1], 'r.');
@@ -129,15 +142,14 @@ stom_rand_crosscorr = computeCrosscorrelation(stomata_points, rand_points_inside
 
 # Plot distributions on histogram
 distance_bins = [w * 100 for w in range(25)];
-stomata_hist = pyplot.hist(stomata_autocorr, bins = distance_bins, alpha = 0.5, label = 'Stomata', color = 'b');
-random_hist = pyplot.hist(random_autocorr, bins = distance_bins, alpha = 0.5, label = 'Random', color = 'r');
-crosscorr_hist = pyplot.hist(stom_rand_crosscorr, bins = distance_bins, alpha = 0.5, label = 'Crosscorrelation', color = 'w');
+stomata_hist = pyplot.hist(stomata_autocorr, weights=np.ones_like(stomata_autocorr) / stomata_autocorr.size, bins = distance_bins, alpha = 0.5, label = 'Stomata', color = 'b');
+random_hist = pyplot.hist(random_autocorr, weights=np.ones_like(random_autocorr) / random_autocorr.size, bins = distance_bins, alpha = 0.5, label = 'Random', color = 'r');
+#crosscorr_hist = pyplot.hist(stom_rand_crosscorr, weights=np.ones_like(stom_rand_crosscorr) / stom_rand_crosscorr.size, bins = distance_bins, alpha = 0.5, label = 'Crosscorrelation', color = 'w');
 pyplot.legend(loc='upper right');
 pyplot.xlabel('Distance (microns)');
-pyplot.ylabel('Frequency');
+pyplot.ylabel('Relative Frequency');
 pyplot.show();
 
-
-#vertcies Nx2 float array of vertices
-#numpy.genfromtxt: (names=True) or skip_header
-#pyplot.gca().add_patch(patches.Polygon(cotyledon_points,closed=True,fill=False)) #This turns a non-polygon into a polygon???
+'''
+End of procedural section.
+'''
