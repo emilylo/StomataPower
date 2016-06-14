@@ -1,6 +1,6 @@
 # Plots cotyledon outlines as polygons and tests the autocorrelation function of
 # stomatal positions within the polygons versus that of random points within
-# the polygons
+# the polygons.
 
 import sys
 import numpy as np;
@@ -77,7 +77,9 @@ End of function definition section.
 Begin of procedural section.
 '''
 
-# Reads in the Excel File (must be of version .xlsx) and gets the worksheet names
+# Reads in the Excel File and gets the worksheet names
+# MAKE SURE EXCEL WORKBOOK FILE IS IN FORMAT .xlsx, NOT .xls, OTHERWISE
+# THE CODE WILL NOT RUN!
 crelox_data_file_name = sys.argv[1];
 crelox_wb = openpyxl.load_workbook(crelox_data_file_name);
 crelox_wb_sheet_names = crelox_wb.get_sheet_names();
@@ -96,7 +98,7 @@ cot_y_max = cotyledon_points[:,1].max();
 
 # Gets the number of sector outline worksheets. Relies on the fact that the sector
 # worksheets come sequentially immediately following the cotyledon outline worksheet
-sector_names = ['Sector 1 Outline', 'Sector 2 Outline', 'Sector 3 Outline', 'Sector 4 Outline', 'Sector 5 Outline', 'Sector 6 Outline', 'Sector 7 Outline', 'Sector 8 Outline', 'Sector 9 Outline', 'Sector 10 Outline'];
+sector_names = ['Sector 1 Outline', 'Sector 2 Outline', 'Sector 3 Outline', 'Sector 4 Outline', 'Sector 5 Outline', 'Sector 6 Outline', 'Sector 7 Outline', 'Sector 8 Outline', 'Sector 9 Outline', 'Sector 10 Outline', 'Sector 11 Outline', 'Sector 12 Outline', 'Sector 13 Outline', 'Sector 14 Outline', 'Sector 15 Outline'];
 cot_sheet_index = crelox_wb_sheet_names.index('Cotyledon Outline');
 number_of_sectors = len(crelox_wb_sheet_names) - (cot_sheet_index + 1);
 
@@ -133,6 +135,10 @@ pyplot.xlabel('X Position (microns)');
 pyplot.ylabel('Y Position (microns)');
 pyplot.show();
 
+print("Number of stomata:");
+print(stomata_count);
+print("Number of random points inside cotyledon:");
+print(number_inside);
 
 # Compute autocorrelation of stomatal points and random points
 stomata_autocorr = computeAutocorrelation(stomata_points);
@@ -144,7 +150,7 @@ stom_rand_crosscorr = computeCrosscorrelation(stomata_points, rand_points_inside
 distance_bins = [w * 100 for w in range(25)];
 stomata_hist = pyplot.hist(stomata_autocorr, weights=np.ones_like(stomata_autocorr) / stomata_autocorr.size, bins = distance_bins, alpha = 0.5, label = 'Stomata', color = 'b');
 random_hist = pyplot.hist(random_autocorr, weights=np.ones_like(random_autocorr) / random_autocorr.size, bins = distance_bins, alpha = 0.5, label = 'Random', color = 'r');
-#crosscorr_hist = pyplot.hist(stom_rand_crosscorr, weights=np.ones_like(stom_rand_crosscorr) / stom_rand_crosscorr.size, bins = distance_bins, alpha = 0.5, label = 'Crosscorrelation', color = 'w');
+crosscorr_hist = pyplot.hist(stom_rand_crosscorr, weights=np.ones_like(stom_rand_crosscorr) / stom_rand_crosscorr.size, bins = distance_bins, alpha = 0.5, label = 'Crosscorrelation', color = 'w');
 pyplot.legend(loc='upper right');
 pyplot.xlabel('Distance (microns)');
 pyplot.ylabel('Relative Frequency');
