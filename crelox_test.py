@@ -79,7 +79,7 @@ Begin of procedural section.
 # Reads in the Excel File and gets the worksheet names
 # MAKE SURE EXCEL WORKBOOK FILE IS IN FORMAT .xlsx, NOT .xls, OTHERWISE
 # THE CODE WILL NOT RUN!
-crelox_data_file_name = input("Please enter crelox data file path and name. (E.g. crelox_data/2015_09_28_Control_S10_TS1.xlsx): ");
+crelox_data_file_name = input("Please enter crelox data file path and name (e.g. crelox_data/2015_09_28_Control_S10_TS1.xlsx): ");
 autocorr_choice = input("Would you like to compute stomatal and random auto-correlations? (y or n) ");
 crosscorr_choice = input("Would you like to compute stomatal-random cross-correlation? (y or n) ");
 crelox_wb = openpyxl.load_workbook(crelox_data_file_name);
@@ -131,14 +131,14 @@ for i in range(0, number_inside):
 
 #pyplot.plot(all_rand_points[:,0], all_rand_points[:,1], 'r.');
 pyplot.plot(rand_points_inside[:,0], rand_points_inside[:,1], 'r.');
-
+pyplot.title('Geometric Plot of Cotyledon');
 pyplot.xlabel('X Position (microns)');
 pyplot.ylabel('Y Position (microns)');
 pyplot.show();
 
 print("Number of stomata:");
 print(stomata_count);
-print("Number of random points inside cotyledon:");
+print("Number of generated random points inside cotyledon:");
 print(number_inside);
 
 # Compute autocorrelation of stomatal points and random points
@@ -159,6 +159,7 @@ if (autocorr_choice == 'y' or crosscorr_choice == 'y'):
     if (crosscorr_choice == 'y'):
         crosscorr_hist = pyplot.hist(stom_rand_crosscorr, weights=np.ones_like(stom_rand_crosscorr) / stom_rand_crosscorr.size, bins = distance_bins, alpha = 0.5, label = 'Crosscorrelation', color = 'w');
     pyplot.legend(loc='upper right');
+    pyplot.title('Correlation Analysis');
     pyplot.xlabel('Distance (microns)');
     pyplot.ylabel('Relative Frequency');
     pyplot.show();
