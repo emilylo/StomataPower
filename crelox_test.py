@@ -2,7 +2,6 @@
 # stomatal positions within the polygons versus that of random points within
 # the polygons.
 
-import sys
 import numpy as np;
 import openpyxl;
 import matplotlib.mlab as mlab;
@@ -80,7 +79,9 @@ Begin of procedural section.
 # Reads in the Excel File and gets the worksheet names
 # MAKE SURE EXCEL WORKBOOK FILE IS IN FORMAT .xlsx, NOT .xls, OTHERWISE
 # THE CODE WILL NOT RUN!
-crelox_data_file_name = sys.argv[1];
+crelox_data_file_name = input("Please enter crelox data file path and name. (E.g. crelox_data/2015_09_28_Control_S10_TS1.xlsx): ");
+autocorr_choice = input("Would you like to compute stomatal and random auto-correlations? (y or n) ");
+crosscorr_choice = input("Would you like to compute stomatal-random cross-correlation? (y or n) ");
 crelox_wb = openpyxl.load_workbook(crelox_data_file_name);
 crelox_wb_sheet_names = crelox_wb.get_sheet_names();
 
@@ -141,20 +142,26 @@ print("Number of random points inside cotyledon:");
 print(number_inside);
 
 # Compute autocorrelation of stomatal points and random points
-stomata_autocorr = computeAutocorrelation(stomata_points);
-random_autocorr = computeAutocorrelation(rand_points_inside);
-stom_rand_crosscorr = computeCrosscorrelation(stomata_points, rand_points_inside);
+if (autocorr_choice == 'y'):
+    stomata_autocorr = computeAutocorrelation(stomata_points);
+    random_autocorr = computeAutocorrelation(rand_points_inside);
+# Compute cross-correlation between stomatal and random points
+if (crosscorr_choice == 'y'):
+    stom_rand_crosscorr = computeCrosscorrelation(stomata_points, rand_points_inside);
 
 
 # Plot distributions on histogram
-distance_bins = [w * 100 for w in range(25)];
-stomata_hist = pyplot.hist(stomata_autocorr, weights=np.ones_like(stomata_autocorr) / stomata_autocorr.size, bins = distance_bins, alpha = 0.5, label = 'Stomata', color = 'b');
-random_hist = pyplot.hist(random_autocorr, weights=np.ones_like(random_autocorr) / random_autocorr.size, bins = distance_bins, alpha = 0.5, label = 'Random', color = 'r');
-crosscorr_hist = pyplot.hist(stom_rand_crosscorr, weights=np.ones_like(stom_rand_crosscorr) / stom_rand_crosscorr.size, bins = distance_bins, alpha = 0.5, label = 'Crosscorrelation', color = 'w');
-pyplot.legend(loc='upper right');
-pyplot.xlabel('Distance (microns)');
-pyplot.ylabel('Relative Frequency');
-pyplot.show();
+if (autocorr_choice == 'y' or crosscorr_choice == 'y'):
+    distance_bins = [w * 100 for w in range(25)];
+    if (autocorr_choice == 'y'): 
+        stomata_hist = pyplot.hist(stomata_autocorr, weights=np.ones_like(stomata_autocorr) / stomata_autocorr.size, bins = distance_bins, alpha = 0.5, label = 'Stomata', color = 'b');
+        random_hist = pyplot.hist(random_autocorr, weights=np.ones_like(random_autocorr) / random_autocorr.size, bins = distance_bins, alpha = 0.5, label = 'Random', color = 'r');
+    if (crosscorr_choice == 'y'):
+        crosscorr_hist = pyplot.hist(stom_rand_crosscorr, weights=np.ones_like(stom_rand_crosscorr) / stom_rand_crosscorr.size, bins = distance_bins, alpha = 0.5, label = 'Crosscorrelation', color = 'w');
+    pyplot.legend(loc='upper right');
+    pyplot.xlabel('Distance (microns)');
+    pyplot.ylabel('Relative Frequency');
+    pyplot.show();
 
 '''
 End of procedural section.
