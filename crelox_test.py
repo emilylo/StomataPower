@@ -119,7 +119,7 @@ pyplot.axis('equal');
 
 # Generates 1000 random points with cot_x_max and cot_y_max and check which random
 # points are inside the cotyledon
-all_rand_points = generateRandomPoints(1000, cot_x_max, cot_y_max);
+all_rand_points = generateRandomPoints(500, cot_x_max, cot_y_max);
 rand_points_indices_inside = checkPointsInPolygon(cotyledon_points, all_rand_points);
 
 # Create np array with only the random points inside the cotyledon
